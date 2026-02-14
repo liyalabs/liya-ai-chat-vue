@@ -3,6 +3,7 @@
 
 // Styles
 import './styles/variables.css'
+import './styles/liquid-glass.css'
 
 // Plugin
 export { LiyaChatPlugin, default } from './plugin'
@@ -18,6 +19,7 @@ export { useChat } from './composables/useChat'
 export { useSessions } from './composables/useSessions'
 export { useVoice } from './composables/useVoice'
 export { useFileUpload } from './composables/useFileUpload'
+export { useI18n } from './i18n'
 
 // API
 export {
@@ -62,3 +64,6 @@ export type {
   SessionState,
   ChatEvents,
 } from './types'
+
+// i18n Types
+export type { SupportedLocale, Translations } from './i18n'

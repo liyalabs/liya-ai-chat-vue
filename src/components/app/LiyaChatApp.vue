@@ -4,10 +4,13 @@ import type { ThemeConfig, Session } from '../../types'
 import { useChat } from '../../composables/useChat'
 import { useSessions } from '../../composables/useSessions'
 import { useFileUpload } from '../../composables/useFileUpload'
+import { useI18n } from '../../i18n/useI18n'
 import { getConfig } from '../../api'
 import SessionSidebar from './SessionSidebar.vue'
 import MessageList from '../shared/MessageList.vue'
 import ChatInput from '../shared/ChatInput.vue'
+
+const { t } = useI18n()
 
 interface Props {
   theme?: ThemeConfig
@@ -40,6 +43,11 @@ const emit = defineEmits<{
 
 const config = getConfig()
 const isMobileSidebarOpen = ref(false)
+const isSidebarCollapsed = ref(false)
+
+function toggleSidebar() {
+  isSidebarCollapsed.value = !isSidebarCollapsed.value
+}
 
 const {
   messages,
@@ -68,17 +76,17 @@ const assistantName = computed(() => config.assistantName || 'Assistant')
 const cssVars = computed(() => {
   const theme = props.theme || {}
   return {
-    '--liya-primary-color': theme.primaryColor || '#6366f1',
-    '--liya-primary-hover': theme.primaryColor ? adjustColor(theme.primaryColor, -10) : '#4f46e5',
-    '--liya-secondary-color': theme.secondaryColor || '#e5e7eb',
-    '--liya-bg-color': theme.backgroundColor || '#ffffff',
-    '--liya-bg-secondary': '#f3f4f6',
-    '--liya-text-color': theme.textColor || '#374151',
-    '--liya-text-muted': '#9ca3af',
-    '--liya-border-color': '#e5e7eb',
-    '--liya-border-radius': theme.borderRadius || '12px',
-    '--liya-font-family': theme.fontFamily || 'system-ui, -apple-system, sans-serif',
-    '--liya-sidebar-width': props.sidebarWidth,
+    '--liya-ai-chat-vuejs-primary-color': theme.primaryColor || '#6366f1',
+    '--liya-ai-chat-vuejs-primary-hover': theme.primaryColor ? adjustColor(theme.primaryColor, -10) : '#4f46e5',
+    '--liya-ai-chat-vuejs-secondary-color': theme.secondaryColor || '#e5e7eb',
+    '--liya-ai-chat-vuejs-bg-color': theme.backgroundColor || '#ffffff',
+    '--liya-ai-chat-vuejs-bg-secondary': '#f3f4f6',
+    '--liya-ai-chat-vuejs-text-color': theme.textColor || '#374151',
+    '--liya-ai-chat-vuejs-text-muted': '#9ca3af',
+    '--liya-ai-chat-vuejs-border-color': '#e5e7eb',
+    '--liya-ai-chat-vuejs-border-radius': theme.borderRadius || '12px',
+    '--liya-ai-chat-vuejs-font-family': theme.fontFamily || 'system-ui, -apple-system, sans-serif',
+    '--liya-ai-chat-vuejs-sidebar-width': props.sidebarWidth,
   }
 })
 
@@ -175,29 +183,48 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="liya-app" :style="cssVars">
+  <div class="liya-ai-chat-vuejs-app" :style="cssVars">
     <!-- Mobile Header -->
-    <div class="liya-app__mobile-header">
-      <button class="liya-app__menu-btn" @click="toggleMobileSidebar">
+    <div class="liya-ai-chat-vuejs-app__mobile-header">
+      <button class="liya-ai-chat-vuejs-app__menu-btn" @click="toggleMobileSidebar">
         <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
           <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
         </svg>
       </button>
-      <span class="liya-app__mobile-title">
+      <span class="liya-ai-chat-vuejs-app__mobile-title">
         {{ currentSession?.session_name || assistantName }}
       </span>
-      <button class="liya-app__new-btn" @click="handleCreateSession">
+      <button class="liya-ai-chat-vuejs-app__new-btn" @click="handleCreateSession">
         <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
           <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
         </svg>
       </button>
     </div>
 
+    <!-- Sidebar Toggle Button (always visible) -->
+    <button 
+      v-if="showSidebar"
+      class="liya-ai-chat-vuejs-app__sidebar-toggle"
+      :class="{ 'liya-ai-chat-vuejs-app__sidebar-toggle--collapsed': isSidebarCollapsed }"
+      @click="toggleSidebar"
+      :title="isSidebarCollapsed ? t.app.openMenu : t.app.closeMenu"
+    >
+      <svg v-if="isSidebarCollapsed" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+        <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+      </svg>
+      <svg v-else viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+        <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/>
+      </svg>
+    </button>
+
     <!-- Sidebar -->
     <aside 
       v-if="showSidebar" 
-      class="liya-app__sidebar"
-      :class="{ 'liya-app__sidebar--open': isMobileSidebarOpen }"
+      class="liya-ai-chat-vuejs-app__sidebar"
+      :class="{ 
+        'liya-ai-chat-vuejs-app__sidebar--open': isMobileSidebarOpen,
+        'liya-ai-chat-vuejs-app__sidebar--collapsed': isSidebarCollapsed
+      }"
     >
       <SessionSidebar
         :sessions="sessions"
@@ -213,26 +240,35 @@ onMounted(async () => {
     <!-- Overlay for mobile -->
     <div 
       v-if="isMobileSidebarOpen" 
-      class="liya-app__overlay"
+      class="liya-ai-chat-vuejs-app__overlay"
       @click="isMobileSidebarOpen = false"
     ></div>
 
     <!-- Main Chat Area -->
-    <main class="liya-app__main">
+    <main class="liya-ai-chat-vuejs-app__main">
       <!-- Chat Header -->
-      <div class="liya-app__header">
-        <div class="liya-app__header-info">
-          <div class="liya-app__avatar">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+      <div class="liya-ai-chat-vuejs-app__header">
+        <div class="liya-ai-chat-vuejs-app__header-info">
+          <div class="liya-ai-chat-vuejs-app__avatar">
+            <svg viewBox="0 0 80 92" fill="none" width="28" height="28">
+              <rect x="0" y="0" width="80" height="80" rx="18" fill="#6366F1"/>
+              <path d="M22 80 L34 80 L28 92 Z" fill="#6366F1"/>
+              <path d="M36 26 V58 H56" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+              <circle cx="36" cy="26" r="3" fill="#FFFFFF"/>
+              <circle cx="36" cy="58" r="3" fill="#FFFFFF"/>
+              <circle cx="56" cy="58" r="3" fill="#FFFFFF"/>
+              <text x="40" y="52" font-size="12" font-weight="600" font-family="system-ui, sans-serif" fill="#FFFFFF">ai</text>
+              <path d="M58 16 L60 20 L64 22 L60 24 L58 28 L56 24 L52 22 L56 20 Z" fill="#FFFFFF"/>
+              <path d="M66 30 L67.5 33 L71 34.5 L67.5 36 L66 39 L64.5 36 L61 34.5 L64.5 33 Z" fill="#FFFFFF"/>
+              <path d="M50 18 L51.5 21 L55 22.5 L51.5 24 L50 27 L48.5 24 L45 22.5 L48.5 21 Z" fill="#FFFFFF"/>
             </svg>
           </div>
-          <div class="liya-app__header-text">
-            <h2 class="liya-app__title">
+          <div class="liya-ai-chat-vuejs-app__header-text">
+            <h2 class="liya-ai-chat-vuejs-app__title">
               {{ currentSession?.session_name || assistantName }}
             </h2>
-            <span class="liya-app__status">
-              {{ currentSession ? `${currentSession.message_count} mesaj` : 'Yeni sohbet başlatın' }}
+            <span class="liya-ai-chat-vuejs-app__status">
+              {{ currentSession ? `${currentSession.message_count} ${t.app.messages}` : t.app.startNewChat }}
             </span>
           </div>
         </div>
@@ -262,132 +298,201 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.liya-app {
+.liya-ai-chat-vuejs-app {
   display: flex;
   height: 100%;
   width: 100%;
-  background: var(--liya-bg-color);
-  font-family: var(--liya-font-family);
+  background: var(--liya-ai-chat-vuejs-glass-bg-primary, rgba(15, 23, 42, 0.95));
+  font-family: var(--liya-ai-chat-vuejs-font-family);
   position: relative;
   overflow: hidden;
+  color: var(--liya-ai-chat-vuejs-text-primary, #f1f5f9);
 }
 
-.liya-app__mobile-header {
+.liya-ai-chat-vuejs-app__mobile-header {
   display: none;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   height: 56px;
-  background: var(--liya-bg-color);
-  border-bottom: 1px solid var(--liya-border-color);
+  background: var(--liya-ai-chat-vuejs-glass-bg-secondary, rgba(30, 41, 59, 0.8));
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--liya-ai-chat-vuejs-glass-border, rgba(255, 255, 255, 0.08));
   align-items: center;
   justify-content: space-between;
   padding: 0 12px;
   z-index: 100;
 }
 
-.liya-app__menu-btn,
-.liya-app__new-btn {
+.liya-ai-chat-vuejs-app__menu-btn,
+.liya-ai-chat-vuejs-app__new-btn {
   width: 40px;
   height: 40px;
   border: none;
-  background: transparent;
-  color: var(--liya-text-color);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--liya-ai-chat-vuejs-text-primary, #f1f5f9);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
 }
 
-.liya-app__menu-btn:hover,
-.liya-app__new-btn:hover {
-  background: var(--liya-bg-secondary);
+.liya-ai-chat-vuejs-app__menu-btn:hover,
+.liya-ai-chat-vuejs-app__new-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
 }
 
-.liya-app__mobile-title {
+.liya-ai-chat-vuejs-app__mobile-title {
   font-weight: 600;
   font-size: 16px;
-  color: var(--liya-text-color);
+  color: var(--liya-ai-chat-vuejs-text-primary, #f1f5f9);
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.liya-app__sidebar {
-  width: var(--liya-sidebar-width);
-  flex-shrink: 0;
-  height: 100%;
+.liya-ai-chat-vuejs-app__sidebar-toggle {
+  position: absolute;
+  top: 20px;
+  left: calc(var(--liya-ai-chat-vuejs-sidebar-width) - 12px);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--liya-ai-chat-vuejs-glass-bg-secondary, rgba(30, 41, 59, 0.95));
+  border: 1px solid var(--liya-ai-chat-vuejs-glass-border, rgba(255, 255, 255, 0.15));
+  color: var(--liya-ai-chat-vuejs-text-secondary, #94a3b8);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 250;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.liya-app__overlay {
+.liya-ai-chat-vuejs-app__sidebar-toggle:hover {
+  background: var(--liya-ai-chat-vuejs-primary-color, #6366f1);
+  color: white;
+  transform: scale(1.1);
+}
+
+.liya-ai-chat-vuejs-app__sidebar-toggle--collapsed {
+  left: 12px;
+}
+
+.liya-ai-chat-vuejs-app__sidebar {
+  width: var(--liya-ai-chat-vuejs-sidebar-width);
+  flex-shrink: 0;
+  height: 100%;
+  background: var(--liya-ai-chat-vuejs-glass-bg-secondary, rgba(30, 41, 59, 0.5));
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-right: 1px solid var(--liya-ai-chat-vuejs-glass-border, rgba(255, 255, 255, 0.08));
+  position: relative;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.liya-ai-chat-vuejs-app__sidebar--collapsed {
+  width: 0;
+  border-right: none;
+}
+
+.liya-ai-chat-vuejs-app__overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 199;
 }
 
-.liya-app__main {
+.liya-ai-chat-vuejs-app__main {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
   height: 100%;
+  background: transparent;
 }
 
-.liya-app__header {
+.liya-ai-chat-vuejs-app__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  border-bottom: 1px solid var(--liya-border-color);
-  background: var(--liya-bg-color);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(79, 70, 229, 0.1) 100%);
+  border-bottom: 1px solid var(--liya-ai-chat-vuejs-glass-border, rgba(255, 255, 255, 0.08));
+  position: relative;
+  overflow: hidden;
 }
 
-.liya-app__header-info {
+.liya-ai-chat-vuejs-app__header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.liya-ai-chat-vuejs-app__header-info {
   display: flex;
   align-items: center;
   gap: 12px;
+  position: relative;
+  z-index: 1;
 }
 
-.liya-app__avatar {
+.liya-ai-chat-vuejs-app__avatar {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--liya-primary-color);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.9) 0%, rgba(79, 70, 229, 0.9) 100%);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.liya-app__header-text {
+.liya-ai-chat-vuejs-app__header-text {
   display: flex;
   flex-direction: column;
 }
 
-.liya-app__title {
+.liya-ai-chat-vuejs-app__title {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: var(--liya-text-color);
+  color: var(--liya-ai-chat-vuejs-text-primary, #f1f5f9);
 }
 
-.liya-app__status {
+.liya-ai-chat-vuejs-app__status {
   font-size: 13px;
-  color: var(--liya-text-muted);
+  color: var(--liya-ai-chat-vuejs-text-secondary, #94a3b8);
 }
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
-  .liya-app__mobile-header {
+  .liya-ai-chat-vuejs-app__mobile-header {
     display: flex;
   }
 
-  .liya-app__sidebar {
+  .liya-ai-chat-vuejs-app__sidebar {
     position: fixed;
     left: 0;
     top: 0;
@@ -398,19 +503,19 @@ onMounted(async () => {
     transition: transform 0.3s ease;
   }
 
-  .liya-app__sidebar--open {
+  .liya-ai-chat-vuejs-app__sidebar--open {
     transform: translateX(0);
   }
 
-  .liya-app__overlay {
+  .liya-ai-chat-vuejs-app__overlay {
     display: block;
   }
 
-  .liya-app__main {
+  .liya-ai-chat-vuejs-app__main {
     padding-top: 56px;
   }
 
-  .liya-app__header {
+  .liya-ai-chat-vuejs-app__header {
     display: none;
   }
 }

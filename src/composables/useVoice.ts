@@ -36,8 +36,29 @@ const transcript = ref('')
 const interimTranscript = ref('')
 const error = ref<string | null>(null)
 const isSupported = ref(false)
+const isIOS = ref(false)
 
 let recognition: SpeechRecognition | null = null
+
+// Detect iOS device
+function detectIOS(): boolean {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false
+  
+  const userAgent = navigator.userAgent || navigator.vendor || ''
+  // Check for iOS devices (iPhone, iPad, iPod)
+  const isIOSDevice = /iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream
+  // Also check for iPad on iOS 13+ which reports as Mac
+  const isIPadOS = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1
+  
+  return isIOSDevice || isIPadOS
+}
+
+// Detect Opera browser
+function detectOpera(): boolean {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') return false
+  const userAgent = navigator.userAgent || ''
+  return userAgent.indexOf('OPR/') !== -1 || userAgent.indexOf('Opera') !== -1
+}
 
 export function useVoice(locale = 'tr-TR') {
   // Check browser support
@@ -46,7 +67,9 @@ export function useVoice(locale = 'tr-TR') {
       ? window.SpeechRecognition || window.webkitSpeechRecognition 
       : null
 
-  isSupported.value = !!SpeechRecognitionAPI
+  // iOS Safari does NOT support SpeechRecognition API
+  isIOS.value = detectIOS()
+  isSupported.value = !!SpeechRecognitionAPI && !isIOS.value
 
   const hasTranscript = computed(() => transcript.value.length > 0)
   const fullTranscript = computed(() => 
@@ -98,7 +121,12 @@ export function useVoice(locale = 'tr-TR') {
 
   function startRecording(): void {
     if (!isSupported.value) {
-      error.value = 'Speech recognition is not supported in this browser'
+      // Provide specific error message for iOS users
+      if (isIOS.value) {
+        error.value = 'Speech recognition is not supported on iOS Safari. Please use text input instead.'
+      } else {
+        error.value = 'Speech recognition is not supported in this browser'
+      }
       return
     }
 
@@ -111,6 +139,17 @@ export function useVoice(locale = 'tr-TR') {
       
       try {
         recognition.start()
+        
+        // Opera workaround: recognition.start() may silently fail.
+        // If onstart hasn't fired within 3s, reset and show error.
+        if (detectOpera()) {
+          setTimeout(() => {
+            if (!isRecording.value && !error.value) {
+              error.value = 'Speech recognition failed to start. Please check microphone permissions in Opera settings.'
+              try { recognition?.abort() } catch (_) { /* ignore */ }
+            }
+          }, 3000)
+        }
       } catch (err) {
         error.value = 'Failed to start recording'
       }
@@ -167,6 +206,7 @@ export function useVoice(locale = 'tr-TR') {
     interimTranscript: readonly(interimTranscript),
     error: readonly(error),
     isSupported: readonly(isSupported),
+    isIOS: readonly(isIOS),
     
     // Computed
     hasTranscript,

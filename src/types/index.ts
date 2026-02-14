@@ -132,6 +132,8 @@ export interface SendMessageResponse {
   response_time?: number
   user_message?: Message
   assistant_message?: Message
+  suggestions?: string[]
+  metadata?: Record<string, any>
 }
 
 export interface SessionHistoryResponse {

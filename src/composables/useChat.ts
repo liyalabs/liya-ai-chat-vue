@@ -54,12 +54,35 @@ export function useChat() {
 
       // Add assistant message
       if (response.assistant_message) {
+        // Enrich with suggestions from response if backend parsed them separately
+        if (response.suggestions && response.suggestions.length > 0) {
+          try {
+            const contentObj = JSON.parse(response.assistant_message.content)
+            if (!contentObj.suggestions) {
+              contentObj.suggestions = response.suggestions
+            }
+            response.assistant_message.content = JSON.stringify(contentObj)
+          } catch {
+            // Content is plain text — wrap it with suggestions
+            response.assistant_message.content = JSON.stringify({
+              response: response.assistant_message.content,
+              suggestions: response.suggestions
+            })
+          }
+        }
         messages.value.push(response.assistant_message)
       } else if (response.response) {
-        // Fallback for simple response format
+        // Build message content: if suggestions exist, wrap as JSON for frontend parsing
+        let messageContent = response.response
+        if (response.suggestions && response.suggestions.length > 0) {
+          messageContent = JSON.stringify({
+            response: response.response,
+            suggestions: response.suggestions
+          })
+        }
         messages.value.push({
           id: response.message_id || `msg-${Date.now()}`,
-          content: response.response,
+          content: messageContent,
           role: 'assistant',
           created_at: new Date().toISOString(),
           response_time: response.response_time,

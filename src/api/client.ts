@@ -2,11 +2,14 @@
 import axios, { AxiosInstance, AxiosError } from 'axios'
 import type { ApiResponse, LiyaChatConfig } from '../types'
 
+// Minimal config for initialization (mode is optional, defaults to 'widget')
+export type InitClientConfig = Omit<LiyaChatConfig, 'mode'> & { mode?: LiyaChatConfig['mode'] }
+
 let apiClient: AxiosInstance | null = null
 let currentConfig: LiyaChatConfig | null = null
 
-export function initializeClient(config: LiyaChatConfig): AxiosInstance {
-  currentConfig = config
+export function initializeClient(config: InitClientConfig): AxiosInstance {
+  currentConfig = { ...config, mode: config.mode || 'widget' }
   
   apiClient = axios.create({
     baseURL: config.baseUrl,

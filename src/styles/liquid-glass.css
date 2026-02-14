@@ -1,0 +1,442 @@
+/**
+ * Liquid Glass Design System for liya-ai-chat-vuejs
+ * Glassmorphism effects with modern UI aesthetics
+ */
+
+/* ============================================================================
+   CSS Custom Properties (Design Tokens)
+   ============================================================================ */
+
+:root {
+  /* Primary Colors - Indigo/Purple gradient base */
+  --liya-ai-chat-vuejs-primary-500: #6366f1;
+  --liya-ai-chat-vuejs-primary-600: #4f46e5;
+  --liya-ai-chat-vuejs-primary-700: #4338ca;
+  
+  /* Glass Background Colors - Dark Theme */
+  --liya-ai-chat-vuejs-glass-bg-primary: rgba(15, 23, 42, 0.6);
+  --liya-ai-chat-vuejs-glass-bg-secondary: rgba(30, 41, 59, 0.5);
+  --liya-ai-chat-vuejs-glass-bg-tertiary: rgba(51, 65, 85, 0.4);
+  --liya-ai-chat-vuejs-glass-bg-input: rgba(15, 23, 42, 0.8);
+  
+  /* Border Colors */
+  --liya-ai-chat-vuejs-glass-border: rgba(255, 255, 255, 0.08);
+  --liya-ai-chat-vuejs-glass-border-hover: rgba(255, 255, 255, 0.15);
+  --liya-ai-chat-vuejs-glass-border-active: rgba(255, 255, 255, 0.2);
+  
+  /* Blur & Effects */
+  --liya-ai-chat-vuejs-glass-blur: blur(20px) saturate(180%);
+  --liya-ai-chat-vuejs-glass-blur-heavy: blur(40px) saturate(200%);
+  
+  /* Glow Effects */
+  --liya-ai-chat-vuejs-primary-glow: rgba(99, 102, 241, 0.5);
+  --liya-ai-chat-vuejs-primary-glow-soft: rgba(99, 102, 241, 0.25);
+  --liya-ai-chat-vuejs-glow-white: rgba(255, 255, 255, 0.1);
+  
+  /* Text Colors */
+  --liya-ai-chat-vuejs-text-primary: rgba(241, 245, 249, 0.95);
+  --liya-ai-chat-vuejs-text-secondary: rgba(148, 163, 184, 0.8);
+  --liya-ai-chat-vuejs-text-muted: rgba(100, 116, 139, 0.7);
+  
+  /* Accent Colors */
+  --liya-ai-chat-vuejs-accent-green: rgba(34, 197, 94, 0.9);
+  --liya-ai-chat-vuejs-accent-blue: rgba(59, 130, 246, 0.9);
+  
+  /* Gradient Definitions */
+  --liya-ai-chat-vuejs-gradient-header: linear-gradient(135deg, rgba(99, 102, 241, 0.85), rgba(79, 70, 229, 0.65));
+  --liya-ai-chat-vuejs-gradient-user-bubble: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(79, 70, 229, 0.75));
+  --liya-ai-chat-vuejs-gradient-input-bg: linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98));
+  --liya-ai-chat-vuejs-gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  
+  /* Shadows */
+  --liya-ai-chat-vuejs-shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.2);
+  --liya-ai-chat-vuejs-shadow-medium: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --liya-ai-chat-vuejs-shadow-glow: 0 0 40px rgba(99, 102, 241, 0.3);
+  
+  /* Border Radius */
+  --liya-ai-chat-vuejs-radius-sm: 8px;
+  --liya-ai-chat-vuejs-radius-md: 12px;
+  --liya-ai-chat-vuejs-radius-lg: 16px;
+  --liya-ai-chat-vuejs-radius-xl: 20px;
+  --liya-ai-chat-vuejs-radius-full: 9999px;
+  
+  /* Spacing Scale */
+  --liya-ai-chat-vuejs-space-xs: 4px;
+  --liya-ai-chat-vuejs-space-sm: 8px;
+  --liya-ai-chat-vuejs-space-md: 16px;
+  --liya-ai-chat-vuejs-space-lg: 24px;
+  --liya-ai-chat-vuejs-space-xl: 32px;
+  
+  /* Transitions */
+  --liya-ai-chat-vuejs-transition-fast: 150ms ease;
+  --liya-ai-chat-vuejs-transition-normal: 250ms ease;
+  --liya-ai-chat-vuejs-transition-slow: 350ms ease;
+}
+
+/* ============================================================================
+   Base Glass Container Styles
+   ============================================================================ */
+
+.liya-ai-chat-vuejs-glass {
+  background: var(--liya-ai-chat-vuejs-glass-bg-primary);
+  backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur);
+  -webkit-backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur);
+  border: 1px solid var(--liya-ai-chat-vuejs-glass-border);
+  border-radius: var(--liya-ai-chat-vuejs-radius-lg);
+}
+
+.liya-ai-chat-vuejs-glass-secondary {
+  background: var(--liya-ai-chat-vuejs-glass-bg-secondary);
+  backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur);
+  -webkit-backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur);
+  border: 1px solid var(--liya-ai-chat-vuejs-glass-border);
+  border-radius: var(--liya-ai-chat-vuejs-radius-md);
+}
+
+.liya-ai-chat-vuejs-glass-input {
+  background: var(--liya-ai-chat-vuejs-glass-bg-input);
+  backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur);
+  -webkit-backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur);
+  border: 1px solid var(--liya-ai-chat-vuejs-glass-border);
+  border-radius: var(--liya-ai-chat-vuejs-radius-full);
+}
+
+/* ============================================================================
+   Header Styles
+   ============================================================================ */
+
+.liya-ai-chat-vuejs-header {
+  background: var(--liya-ai-chat-vuejs-gradient-header);
+  border-bottom: 1px solid var(--liya-ai-chat-vuejs-glass-border);
+  position: relative;
+  overflow: hidden;
+}
+
+.liya-ai-chat-vuejs-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--liya-ai-chat-vuejs-gradient-glass);
+  pointer-events: none;
+}
+
+.liya-ai-chat-vuejs-header-glow {
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, var(--liya-ai-chat-vuejs-primary-glow) 0%, transparent 70%);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* ============================================================================
+   Message Bubble Styles
+   ============================================================================ */
+
+.liya-ai-chat-vuejs-message-user {
+  background: var(--liya-ai-chat-vuejs-gradient-user-bubble);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 4px 16px rgba(99, 102, 241, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border-radius: var(--liya-ai-chat-vuejs-radius-md);
+  border-bottom-right-radius: var(--liya-ai-chat-vuejs-radius-sm);
+  color: white;
+}
+
+.liya-ai-chat-vuejs-message-assistant {
+  background: var(--liya-ai-chat-vuejs-glass-bg-secondary);
+  backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur);
+  -webkit-backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur);
+  border: 1px solid var(--liya-ai-chat-vuejs-glass-border);
+  border-radius: var(--liya-ai-chat-vuejs-radius-md);
+  border-bottom-left-radius: var(--liya-ai-chat-vuejs-radius-sm);
+  color: var(--liya-ai-chat-vuejs-text-primary);
+}
+
+/* ============================================================================
+   Input Styles
+   ============================================================================ */
+
+.liya-ai-chat-vuejs-input-wrapper {
+  background: var(--liya-ai-chat-vuejs-glass-bg-input);
+  backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur);
+  -webkit-backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur);
+  border: 1px solid var(--liya-ai-chat-vuejs-glass-border);
+  border-radius: var(--liya-ai-chat-vuejs-radius-full);
+  transition: all var(--liya-ai-chat-vuejs-transition-normal);
+}
+
+.liya-ai-chat-vuejs-input-wrapper:focus-within {
+  border-color: var(--liya-ai-chat-vuejs-primary-500);
+  box-shadow: 0 0 0 3px var(--liya-ai-chat-vuejs-primary-glow-soft);
+}
+
+.liya-ai-chat-vuejs-input-field {
+  background: transparent;
+  border: none;
+  color: var(--liya-ai-chat-vuejs-text-primary);
+  outline: none;
+}
+
+.liya-ai-chat-vuejs-input-field::placeholder {
+  color: var(--liya-ai-chat-vuejs-text-secondary);
+}
+
+/* ============================================================================
+   Button Styles
+   ============================================================================ */
+
+.liya-ai-chat-vuejs-btn-primary {
+  background: linear-gradient(135deg, var(--liya-ai-chat-vuejs-primary-500), var(--liya-ai-chat-vuejs-primary-600));
+  border: none;
+  border-radius: var(--liya-ai-chat-vuejs-radius-full);
+  color: white;
+  cursor: pointer;
+  transition: all var(--liya-ai-chat-vuejs-transition-fast);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.liya-ai-chat-vuejs-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+}
+
+.liya-ai-chat-vuejs-btn-icon {
+  background: transparent;
+  border: none;
+  border-radius: var(--liya-ai-chat-vuejs-radius-full);
+  color: var(--liya-ai-chat-vuejs-text-secondary);
+  cursor: pointer;
+  transition: all var(--liya-ai-chat-vuejs-transition-fast);
+}
+
+.liya-ai-chat-vuejs-btn-icon:hover {
+  background: var(--liya-ai-chat-vuejs-glass-bg-tertiary);
+  color: var(--liya-ai-chat-vuejs-text-primary);
+}
+
+/* ============================================================================
+   Sidebar Styles
+   ============================================================================ */
+
+.liya-ai-chat-vuejs-sidebar {
+  background: var(--liya-ai-chat-vuejs-glass-bg-primary);
+  backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur-heavy);
+  -webkit-backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur-heavy);
+  border-right: 1px solid var(--liya-ai-chat-vuejs-glass-border);
+}
+
+.liya-ai-chat-vuejs-sidebar-item {
+  background: transparent;
+  border: none;
+  border-radius: var(--liya-ai-chat-vuejs-radius-md);
+  color: var(--liya-ai-chat-vuejs-text-secondary);
+  cursor: pointer;
+  transition: all var(--liya-ai-chat-vuejs-transition-fast);
+}
+
+.liya-ai-chat-vuejs-sidebar-item:hover {
+  background: var(--liya-ai-chat-vuejs-glass-bg-tertiary);
+  color: var(--liya-ai-chat-vuejs-text-primary);
+}
+
+.liya-ai-chat-vuejs-sidebar-item--active {
+  background: var(--liya-ai-chat-vuejs-glass-bg-secondary);
+  border: 1px solid var(--liya-ai-chat-vuejs-glass-border-active);
+  color: var(--liya-ai-chat-vuejs-text-primary);
+}
+
+/* ============================================================================
+   Widget Toggle Button Styles
+   ============================================================================ */
+
+.liya-ai-chat-vuejs-widget-toggle {
+  background: linear-gradient(135deg, var(--liya-ai-chat-vuejs-primary-500), var(--liya-ai-chat-vuejs-primary-600));
+  border: none;
+  border-radius: 50%;
+  box-shadow: 
+    0 4px 16px rgba(99, 102, 241, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  cursor: pointer;
+  transition: all var(--liya-ai-chat-vuejs-transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.liya-ai-chat-vuejs-widget-toggle::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: conic-gradient(from 0deg, transparent, var(--liya-ai-chat-vuejs-primary-glow), transparent 30%);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity var(--liya-ai-chat-vuejs-transition-normal);
+  animation: liya-ai-chat-vuejs-rotate 3s linear infinite;
+}
+
+.liya-ai-chat-vuejs-widget-toggle:hover::before {
+  opacity: 1;
+}
+
+.liya-ai-chat-vuejs-widget-toggle:hover {
+  transform: scale(1.05);
+  box-shadow: 
+    0 6px 24px rgba(99, 102, 241, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+}
+
+@keyframes liya-ai-chat-vuejs-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================================
+   Typing Indicator Styles
+   ============================================================================ */
+
+.liya-ai-chat-vuejs-typing {
+  background: var(--liya-ai-chat-vuejs-glass-bg-secondary);
+  backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur);
+  border: 1px solid var(--liya-ai-chat-vuejs-glass-border);
+  border-radius: var(--liya-ai-chat-vuejs-radius-md);
+  border-bottom-left-radius: var(--liya-ai-chat-vuejs-radius-sm);
+}
+
+.liya-ai-chat-vuejs-typing-dot {
+  background: var(--liya-ai-chat-vuejs-primary-500);
+  border-radius: 50%;
+  animation: liya-ai-chat-vuejs-typing-bounce 1.4s infinite ease-in-out both;
+}
+
+.liya-ai-chat-vuejs-typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.liya-ai-chat-vuejs-typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes liya-ai-chat-vuejs-typing-bounce {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+   Scrollbar Styles
+   ============================================================================ */
+
+.liya-ai-chat-vuejs-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.liya-ai-chat-vuejs-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.liya-ai-chat-vuejs-scroll::-webkit-scrollbar-thumb {
+  background: var(--liya-ai-chat-vuejs-glass-bg-tertiary);
+  border-radius: var(--liya-ai-chat-vuejs-radius-full);
+}
+
+.liya-ai-chat-vuejs-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--liya-ai-chat-vuejs-glass-border-hover);
+}
+
+/* ============================================================================
+   Suggestion Button Styles
+   ============================================================================ */
+
+.liya-ai-chat-vuejs-suggestion {
+  background: var(--liya-ai-chat-vuejs-glass-bg-tertiary);
+  backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur);
+  border: 1px solid var(--liya-ai-chat-vuejs-glass-border);
+  border-radius: var(--liya-ai-chat-vuejs-radius-full);
+  color: var(--liya-ai-chat-vuejs-text-secondary);
+  cursor: pointer;
+  transition: all var(--liya-ai-chat-vuejs-transition-fast);
+}
+
+.liya-ai-chat-vuejs-suggestion:hover {
+  background: var(--liya-ai-chat-vuejs-glass-bg-secondary);
+  border-color: var(--liya-ai-chat-vuejs-glass-border-hover);
+  color: var(--liya-ai-chat-vuejs-text-primary);
+  transform: translateY(-1px);
+}
+
+/* ============================================================================
+   JSON Preview Card Styles
+   ============================================================================ */
+
+.liya-ai-chat-vuejs-json-card {
+  background: var(--liya-ai-chat-vuejs-glass-bg-tertiary);
+  backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur);
+  border: 1px solid var(--liya-ai-chat-vuejs-glass-border);
+  border-radius: var(--liya-ai-chat-vuejs-radius-md);
+}
+
+/* ============================================================================
+   Welcome Screen Styles
+   ============================================================================ */
+
+.liya-ai-chat-vuejs-welcome {
+  background: var(--liya-ai-chat-vuejs-glass-bg-secondary);
+  backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur);
+  border: 1px solid var(--liya-ai-chat-vuejs-glass-border);
+  border-radius: var(--liya-ai-chat-vuejs-radius-lg);
+}
+
+/* ============================================================================
+   Panel/Widget Container Styles
+   ============================================================================ */
+
+.liya-ai-chat-vuejs-panel {
+  background: var(--liya-ai-chat-vuejs-glass-bg-primary);
+  backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur-heavy);
+  -webkit-backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur-heavy);
+  border: 1px solid var(--liya-ai-chat-vuejs-glass-border);
+  border-radius: var(--liya-ai-chat-vuejs-radius-xl);
+  box-shadow: var(--liya-ai-chat-vuejs-shadow-medium);
+}
+
+/* ============================================================================
+   Mobile Responsive Adjustments
+   ============================================================================ */
+
+@media (max-width: 480px) {
+  .liya-ai-chat-vuejs-panel {
+    border-radius: var(--liya-ai-chat-vuejs-radius-lg);
+    border: none;
+  }
+  
+  .liya-ai-chat-vuejs-sidebar {
+    backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur);
+    -webkit-backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur);
+  }
+}
+
+/* ============================================================================
+   Performance Optimizations
+   ============================================================================ */
+
+.liya-ai-chat-vuejs-glass,
+.liya-ai-chat-vuejs-glass-secondary,
+.liya-ai-chat-vuejs-panel,
+.liya-ai-chat-vuejs-sidebar {
+  will-change: transform;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .liya-ai-chat-vuejs-widget-toggle::before,
+  .liya-ai-chat-vuejs-typing-dot {
+    animation: none;
+  }
+  
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
