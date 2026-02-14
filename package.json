@@ -1,0 +1,61 @@
+{
+  "name": "@liyalabs/liya-ai-chat-vue",
+  "version": "1.0.1",
+  "description": "Liya AI Chat - Vue.js chat widget and full app component for AI assistants",
+  "type": "module",
+  "main": "./dist/liya-ai-chat.umd.cjs",
+  "module": "./dist/liya-ai-chat.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/liya-ai-chat.js",
+      "require": "./dist/liya-ai-chat.umd.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview",
+    "type-check": "vue-tsc --noEmit"
+  },
+  "peerDependencies": {
+    "vue": "^3.3.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@vitejs/plugin-vue": "^4.5.0",
+    "typescript": "~5.6.0",
+    "vite": "^5.0.0",
+    "vite-plugin-dts": "^3.6.0",
+    "vue": "^3.3.0",
+    "vue-tsc": "^2.0.0"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "chat",
+    "chatbot",
+    "ai",
+    "assistant",
+    "widget",
+    "liya"
+  ],
+  "author": "Liya Labs",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/liyalabs/liya-ai-chat"
+  },
+  "bugs": {
+    "url": "https://github.com/liyalabs/liya-ai-chat/issues"
+  },
+  "homepage": "https://liyalabs.com"
+}
