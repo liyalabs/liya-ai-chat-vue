@@ -67,9 +67,10 @@ export function useVoice(locale = 'tr-TR') {
       ? window.SpeechRecognition || window.webkitSpeechRecognition 
       : null
 
-  // iOS Safari does NOT support SpeechRecognition API
+  // iOS Safari and Opera do NOT reliably support SpeechRecognition API
   isIOS.value = detectIOS()
-  isSupported.value = !!SpeechRecognitionAPI && !isIOS.value
+  const isOpera = detectOpera()
+  isSupported.value = !!SpeechRecognitionAPI && !isIOS.value && !isOpera
 
   const hasTranscript = computed(() => transcript.value.length > 0)
   const fullTranscript = computed(() => 
