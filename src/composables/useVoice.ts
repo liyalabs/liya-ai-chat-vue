@@ -1,3 +1,18 @@
+/**
+ * ==================================================
+ * ██╗     ██╗██╗   ██╗ █████╗ 
+ * ██║     ██║╚██╗ ██╔╝██╔══██╗
+ * ██║     ██║ ╚████╔╝ ███████║
+ * ██║     ██║  ╚██╔╝  ██╔══██║
+ * ███████╗██║   ██║   ██║  ██║
+ * ╚══════╝╚═╝   ╚═╝   ╚═╝  ╚═╝
+ *        AI Assistant
+ * ==================================================
+ * Author / Creator : Mahmut Denizli (With help of LiyaAi)
+ * License          : MIT
+ * Connect          : liyalabs.com, info@liyalabs.com
+ * ==================================================
+ */
 // Liya AI Chat - useVoice Composable (Speech-to-Text)
 import { ref, computed, readonly, onUnmounted } from 'vue'
 
@@ -37,6 +52,7 @@ const interimTranscript = ref('')
 const error = ref<string | null>(null)
 const isSupported = ref(false)
 const isIOS = ref(false)
+const micPermission = ref<'prompt' | 'granted' | 'denied'>('prompt')
 
 let recognition: SpeechRecognition | null = null
 
@@ -192,6 +208,41 @@ export function useVoice(locale = 'tr-TR') {
     return errorMessages[errorCode] || 'An error occurred during recording.'
   }
 
+  // Check current microphone permission status
+  async function checkMicPermission(): Promise<'prompt' | 'granted' | 'denied'> {
+    if (typeof navigator === 'undefined' || !navigator.permissions) {
+      return 'prompt'
+    }
+    try {
+      const result = await navigator.permissions.query({ name: 'microphone' as PermissionName })
+      micPermission.value = result.state as 'prompt' | 'granted' | 'denied'
+      // Listen for permission changes
+      result.onchange = () => {
+        micPermission.value = result.state as 'prompt' | 'granted' | 'denied'
+      }
+      return result.state as 'prompt' | 'granted' | 'denied'
+    } catch {
+      return 'prompt'
+    }
+  }
+
+  // Request microphone permission early (on widget open)
+  async function requestMicPermission(): Promise<boolean> {
+    if (!isSupported.value) {
+      return false
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      // Stop all tracks immediately - we just wanted the permission
+      stream.getTracks().forEach(track => track.stop())
+      micPermission.value = 'granted'
+      return true
+    } catch {
+      micPermission.value = 'denied'
+      return false
+    }
+  }
+
   // Cleanup on unmount
   onUnmounted(() => {
     if (recognition && isRecording.value) {
@@ -208,6 +259,7 @@ export function useVoice(locale = 'tr-TR') {
     error: readonly(error),
     isSupported: readonly(isSupported),
     isIOS: readonly(isIOS),
+    micPermission: readonly(micPermission),
     
     // Computed
     hasTranscript,
@@ -218,5 +270,7 @@ export function useVoice(locale = 'tr-TR') {
     stopRecording,
     cancelRecording,
     clearTranscript,
+    checkMicPermission,
+    requestMicPermission,
   }
 }

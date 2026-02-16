@@ -1,8 +1,25 @@
+/**
+ * ==================================================
+ * ██╗     ██╗██╗   ██╗ █████╗ 
+ * ██║     ██║╚██╗ ██╔╝██╔══██╗
+ * ██║     ██║ ╚████╔╝ ███████║
+ * ██║     ██║  ╚██╔╝  ██╔══██║
+ * ███████╗██║   ██║   ██║  ██║
+ * ╚══════╝╚═╝   ╚═╝   ╚═╝  ╚═╝
+ *        AI Assistant
+ * ==================================================
+ * Author / Creator : Mahmut Denizli (With help of LiyaAi)
+ * License          : MIT
+ * Connect          : liyalabs.com, info@liyalabs.com
+ * ==================================================
+ */
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import type { ThemeConfig } from '../../types'
 import { useChat } from '../../composables/useChat'
 import { useFileUpload } from '../../composables/useFileUpload'
+import { useVoice } from '../../composables/useVoice'
+import { checkBrowserCompatibility } from '../../composables/useBrowserCompat'
 import { useI18n } from '../../i18n/useI18n'
 import { getConfig } from '../../api'
 import MessageList from '../shared/MessageList.vue'
@@ -55,6 +72,19 @@ const emit = defineEmits<{
 
 const isOpen = ref(props.startOpen)
 const config = getConfig()
+
+// Browser compatibility state
+const isBrowserSupported = ref(true)
+
+// Microphone permission state
+const isMicPermissionPending = ref(false)
+
+// Voice composable
+const {
+  isSupported: isVoiceSupported,
+  checkMicPermission,
+  requestMicPermission,
+} = useVoice()
 
 const {
   messages,
@@ -145,7 +175,22 @@ function handleSuggestionClick(suggestion: string): void {
   handleSend(suggestion)
 }
 
-onMounted(() => {
+// Handle mic permission request
+async function handleMicPermissionRequest(): Promise<void> {
+  const granted = await requestMicPermission()
+  isMicPermissionPending.value = false
+  if (!granted) {
+    // Permission denied, continue without voice
+  }
+}
+
+onMounted(async () => {
+  // Check browser compatibility first
+  const compat = checkBrowserCompatibility()
+  isBrowserSupported.value = compat.supported
+  
+  if (!compat.supported) return
+  
   initFromStorage()
   
   // Load history if we have a stored session
@@ -153,11 +198,33 @@ onMounted(() => {
   if (storedSessionId) {
     loadHistory(storedSessionId)
   }
+  
+  // Check mic permission if voice is supported
+  if (isVoiceSupported.value) {
+    const status = await checkMicPermission()
+    if (status === 'prompt') {
+      isMicPermissionPending.value = true
+    }
+  }
 })
 </script>
 
 <template>
-  <div class="liya-ai-chat-vuejs-widget" :class="positionClasses" :style="cssVars">
+  <!-- Browser Not Supported Card -->
+  <div v-if="!isBrowserSupported" class="liya-ai-chat-vuejs-unsupported" :style="cssVars">
+    <div class="liya-ai-chat-vuejs-unsupported__card">
+      <div class="liya-ai-chat-vuejs-unsupported__icon">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+        </svg>
+      </div>
+      <h3 class="liya-ai-chat-vuejs-unsupported__title">{{ t.browser.unsupportedTitle }}</h3>
+      <p class="liya-ai-chat-vuejs-unsupported__message">{{ t.browser.unsupportedMessage }}</p>
+      <p class="liya-ai-chat-vuejs-unsupported__browsers">{{ t.browser.recommendedBrowsers }}</p>
+    </div>
+  </div>
+
+  <div v-else class="liya-ai-chat-vuejs-widget" :class="positionClasses" :style="cssVars">
     <!-- Toggle Button -->
     <button 
       class="liya-ai-chat-vuejs-widget__toggle"
@@ -185,6 +252,25 @@ onMounted(() => {
     <!-- Chat Panel -->
     <Transition name="liya-ai-chat-vuejs-slide">
       <div v-if="isOpen" class="liya-ai-chat-vuejs-widget__panel">
+        <!-- Mic Permission Banner -->
+        <div v-if="isMicPermissionPending" class="liya-ai-chat-vuejs-mic-permission">
+          <div class="liya-ai-chat-vuejs-mic-permission__icon">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+              <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+            </svg>
+          </div>
+          <div class="liya-ai-chat-vuejs-mic-permission__text">
+            <span class="liya-ai-chat-vuejs-mic-permission__title">{{ t.mic.permissionRequired }}</span>
+            <span class="liya-ai-chat-vuejs-mic-permission__desc">{{ t.mic.permissionMessage }}</span>
+          </div>
+          <button 
+            class="liya-ai-chat-vuejs-mic-permission__btn"
+            @click="handleMicPermissionRequest"
+          >
+            {{ t.mic.allowButton }}
+          </button>
+        </div>
+
         <!-- Header -->
         <div class="liya-ai-chat-vuejs-widget__header">
           <div class="liya-ai-chat-vuejs-widget__header-info">
@@ -529,5 +615,116 @@ onMounted(() => {
     right: 0;
     left: 0;
   }
+}
+
+/* Browser Not Supported Card */
+.liya-ai-chat-vuejs-unsupported {
+  position: fixed;
+  bottom: var(--liya-ai-chat-vuejs-offset-y, 20px);
+  right: var(--liya-ai-chat-vuejs-offset-x, 20px);
+  z-index: var(--liya-ai-chat-vuejs-z-index, 9999);
+  font-family: var(--liya-ai-chat-vuejs-font-family);
+}
+
+.liya-ai-chat-vuejs-unsupported__card {
+  width: 320px;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  text-align: center;
+}
+
+.liya-ai-chat-vuejs-unsupported__icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ef4444;
+}
+
+.liya-ai-chat-vuejs-unsupported__title {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.liya-ai-chat-vuejs-unsupported__message {
+  margin: 0 0 12px 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #94a3b8;
+}
+
+.liya-ai-chat-vuejs-unsupported__browsers {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Mic Permission Banner */
+.liya-ai-chat-vuejs-mic-permission {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.liya-ai-chat-vuejs-mic-permission__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a5b4fc;
+  flex-shrink: 0;
+}
+
+.liya-ai-chat-vuejs-mic-permission__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.liya-ai-chat-vuejs-mic-permission__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.liya-ai-chat-vuejs-mic-permission__desc {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.liya-ai-chat-vuejs-mic-permission__btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.liya-ai-chat-vuejs-mic-permission__btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
 </style>

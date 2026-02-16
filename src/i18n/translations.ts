@@ -1,3 +1,18 @@
+/**
+ * ==================================================
+ * ██╗     ██╗██╗   ██╗ █████╗ 
+ * ██║     ██║╚██╗ ██╔╝██╔══██╗
+ * ██║     ██║ ╚████╔╝ ███████║
+ * ██║     ██║  ╚██╔╝  ██╔══██║
+ * ███████╗██║   ██║   ██║  ██║
+ * ╚══════╝╚═╝   ╚═╝   ╚═╝  ╚═╝
+ *        AI Assistant
+ * ==================================================
+ * Author / Creator : Mahmut Denizli (With help of LiyaAi)
+ * License          : MIT
+ * Connect          : liyalabs.com, info@liyalabs.com
+ * ==================================================
+ */
 // Liya AI Chat - Internationalization Translations
 
 export type SupportedLocale = 'tr' | 'en'
@@ -10,6 +25,20 @@ export interface Translations {
     online: string
     preparing: string
     speaking: string
+  }
+  // Browser compatibility
+  browser: {
+    unsupportedTitle: string
+    unsupportedMessage: string
+    recommendedBrowsers: string
+    closeButton: string
+  }
+  // Microphone permission
+  mic: {
+    permissionRequired: string
+    permissionMessage: string
+    allowButton: string
+    denied: string
   }
   // Chat
   chat: {
@@ -87,6 +116,18 @@ export const translations: Record<SupportedLocale, Translations> = {
       online: 'Çevrimiçi',
       preparing: 'Hazırlanıyor...',
       speaking: 'Konuşuyor...',
+    },
+    browser: {
+      unsupportedTitle: 'Tarayıcı Desteklenmiyor',
+      unsupportedMessage: 'Bu widget tarayıcınızda çalışmıyor. Lütfen güncel bir tarayıcı kullanın.',
+      recommendedBrowsers: 'Önerilen: Chrome, Edge, Firefox, Safari',
+      closeButton: 'Kapat',
+    },
+    mic: {
+      permissionRequired: 'Mikrofon İzni Gerekli',
+      permissionMessage: 'Sesli iletişim için mikrofon erişimine izin verin.',
+      allowButton: 'İzin Ver',
+      denied: 'Mikrofon izni reddedildi',
     },
     chat: {
       placeholder: 'Mesajınızı yazın...',
@@ -169,6 +210,18 @@ export const translations: Record<SupportedLocale, Translations> = {
       online: 'Online',
       preparing: 'Preparing...',
       speaking: 'Speaking...',
+    },
+    browser: {
+      unsupportedTitle: 'Browser Not Supported',
+      unsupportedMessage: 'This widget does not work in your browser. Please use a modern browser.',
+      recommendedBrowsers: 'Recommended: Chrome, Edge, Firefox, Safari',
+      closeButton: 'Close',
+    },
+    mic: {
+      permissionRequired: 'Microphone Permission Required',
+      permissionMessage: 'Allow microphone access for voice communication.',
+      allowButton: 'Allow',
+      denied: 'Microphone permission denied',
     },
     chat: {
       placeholder: 'Type your message...',
