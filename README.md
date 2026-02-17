@@ -2,6 +2,31 @@
 
 Vue.js Chat Widget & Full App Component for Liya AI Assistants.
 
+[![npm version](https://img.shields.io/npm/v/@liyalabs/liya-ai-chat-vue.svg)](https://www.npmjs.com/package/@liyalabs/liya-ai-chat-vue)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+> **[Live Demo →](https://ai.liyalabs.com)** &nbsp;|&nbsp; **[Website →](https://liyalabs.com)**
+
+## Screenshots
+
+### Widget Mode (Floating Chat)
+
+| Desktop | Mobile |
+|---------|--------|
+| ![Widget Desktop](screenshots/widget-desktop.png) | ![Widget Mobile](screenshots/widget-mobile.png) |
+
+### App Mode (Full Chat Interface)
+
+| Desktop | Mobile |
+|---------|--------|
+| ![App Desktop](screenshots/app-desktop.png) | ![App Mobile](screenshots/app-mobile.png) |
+
+### Features
+
+| Session History | File Upload | Voice Input |
+|----------------|-------------|-------------|
+| ![Sessions](screenshots/session-history.png) | ![Upload](screenshots/file-upload.png) | ![Voice](screenshots/voice-input.png) |
+
 ## Features
 
 - 🎨 **Two Modes**: Widget (floating chatbox) & App (full chat interface)
@@ -382,12 +407,20 @@ app.use(LiyaChatPlugin, {
 })
 ```
 
+## Live Demo
+
+See the widget in action:
+
+- **Full Platform**: [ai.liyalabs.com](https://ai.liyalabs.com) — Create an assistant and use the chat widget & app mode
+- **Website**: [liyalabs.com](https://liyalabs.com) — See the chat widget embedded on a live website
+
 ## License
 
 MIT © Liya Labs
 
 ## Support
 
-- Documentation: https://docs.liyalabs.com
-- Issues: https://github.com/liyalabs/liya-ai-chat/issues
-- Email: support@liyalabs.com
+- 🌐 Website: [liyalabs.com](https://liyalabs.com)
+- 📖 Documentation: [docs.liyalabs.com](https://docs.liyalabs.com)
+- 🐛 Issues: [GitHub Issues](https://github.com/liyalabs/liya-ai-chat/issues)
+- 📧 Email: support@liyalabs.com

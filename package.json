@@ -1,6 +1,6 @@
 {
   "name": "@liyalabs/liya-ai-chat-vue",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Liya AI Chat - Vue.js chat widget and full app component for AI assistants",
   "type": "module",
   "main": "./dist/liya-ai-chat.umd.cjs",
@@ -15,7 +15,9 @@
     "./style.css": "./dist/liya-ai-chat-vue.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "screenshots",
+    "README.md"
   ],
   "scripts": {
     "dev": "vite",
