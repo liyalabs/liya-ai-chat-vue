@@ -425,11 +425,22 @@
   .liya-ai-chat-vuejs-panel {
     border-radius: var(--liya-ai-chat-vuejs-radius-lg);
     border: none;
+    /* iOS Safari dynamic viewport height support */
+    height: 100dvh;
+    height: calc(100vh - env(safe-area-inset-bottom, 0px));
+    max-height: 100dvh;
   }
   
   .liya-ai-chat-vuejs-sidebar {
     backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur);
     -webkit-backdrop-filter: var(--liya-ai-chat-vuejs-glass-blur);
+  }
+}
+
+/* iOS Safe Area Support */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .liya-ai-chat-vuejs-panel {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
 

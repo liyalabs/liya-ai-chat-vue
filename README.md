@@ -41,7 +41,7 @@ const app = createApp(App)
 app.use(LiyaChatPlugin, {
   mode: 'widget',
   apiKey: 'liwhai_your_api_key_here',
-  baseUrl: 'https://app-1-ai.liyalabs.com',
+  baseUrl: 'https://app-X-ai.liyalabs.com', // Your assigned backend URL (see GAR section)
   assistantId: 'your-assistant-uuid',
   assistantName: 'Destek Asistanı',
   theme: {
@@ -84,7 +84,7 @@ const app = createApp(App)
 app.use(LiyaChatPlugin, {
   mode: 'app',
   apiKey: 'liwhai_your_api_key_here',
-  baseUrl: 'https://app-1-ai.liyalabs.com',
+  baseUrl: 'https://app-X-ai.liyalabs.com', // Your assigned backend URL (see GAR section)
   assistantId: 'your-assistant-uuid',
   assistantName: 'AI Assistant',
   features: {
@@ -343,6 +343,44 @@ import type {
 - Firefox (latest)
 - Safari (latest)
 - Edge (latest)
+
+## GAR (Global Application Router)
+
+Liya AI uses a distributed backend architecture. Each user is assigned to a specific backend instance based on their account.
+
+### Finding Your Backend URL
+
+Your backend URL is displayed in your Liya AI dashboard under **Settings > API Configuration**. It follows this pattern:
+
+```
+https://app-{X}-ai.liyalabs.com
+```
+
+Where `{X}` is your assigned instance number (1, 2, 3, etc.).
+
+### Examples
+
+| Instance | Backend URL |
+|----------|-------------|
+| 1 | `https://app-1-ai.liyalabs.com` |
+| 2 | `https://app-2-ai.liyalabs.com` |
+| 3 | `https://app-3-ai.liyalabs.com` |
+
+### Dynamic Configuration
+
+For production apps, we recommend fetching your backend URL dynamically:
+
+```typescript
+// Fetch config from your backend or environment
+const config = await fetch('/api/config').then(r => r.json())
+
+app.use(LiyaChatPlugin, {
+  apiKey: config.apiKey,
+  baseUrl: config.baseUrl, // Dynamic from GAR
+  assistantId: config.assistantId,
+  // ...
+})
+```
 
 ## License
 

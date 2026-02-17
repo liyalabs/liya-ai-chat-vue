@@ -21,8 +21,12 @@ import './styles/variables.css'
 import './styles/liquid-glass.css'
 
 // Plugin
-export { LiyaChatPlugin, default } from './plugin'
+import { LiyaChatPlugin } from './plugin'
+export { LiyaChatPlugin }
 export type { LiyaChatPluginOptions } from './plugin'
+
+// Default export for app.use()
+export default LiyaChatPlugin
 
 // Components
 export { LiyaChatWidget } from './components/widget'

@@ -8,11 +8,11 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/liya-ai-chat.js",
-      "require": "./dist/liya-ai-chat.umd.cjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/liya-ai-chat.umd.cjs"
     },
-    "./style.css": "./dist/style.css"
+    "./style.css": "./dist/liya-ai-chat-vue.css"
   },
   "files": [
     "dist"
