@@ -14,7 +14,7 @@
  * ==================================================
  */
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import type { Message, ParsedResponse } from '../../types'
 
 interface Props {
@@ -36,7 +36,7 @@ const emit = defineEmits<{
 const isUser = props.message.role === 'user'
 
 // Fields to exclude from preview
-const excludedPreviewFields = ['metadata', 'source', 'sources', 'raw_response', 'id', 'created_at', 'updated_at', 'session_id', 'message_id']
+const excludedPreviewFields = ['metadata', 'source', 'sources', 'raw_response', 'id', 'created_at', 'updated_at', 'session_id', 'message_id', 'response', 'suggestions']
 
 // Check if content is JSON
 function isJsonContent(content: string): boolean {
@@ -254,6 +254,32 @@ function formatTime(dateString: string): string {
   const date = new Date(dateString)
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
+
+const copySuccess = ref(false)
+
+async function handleCopy(): Promise<void> {
+  const text = parsedResponse.value
+    ? parsedResponse.value.response
+    : props.message.content || ''
+  if (!text) return
+  try {
+    await navigator.clipboard.writeText(text)
+    copySuccess.value = true
+    setTimeout(() => { copySuccess.value = false }, 2000)
+  } catch {
+    // fallback
+    const ta = document.createElement('textarea')
+    ta.value = text
+    ta.style.position = 'fixed'
+    ta.style.opacity = '0'
+    document.body.appendChild(ta)
+    ta.select()
+    document.execCommand('copy')
+    document.body.removeChild(ta)
+    copySuccess.value = true
+    setTimeout(() => { copySuccess.value = false }, 2000)
+  }
+}
 </script>
 
 <template>
@@ -394,6 +420,25 @@ function formatTime(dateString: string): string {
         <!-- Regular text content -->
         <div v-else class="liya-ai-chat-vuejs-message__text" v-html="displayContent"></div>
       </div>
+
+      <!-- Copy button for assistant messages -->
+      <button
+        v-if="!isUser && (displayContent || hasJsonContent)"
+        class="liya-ai-chat-vuejs-message__copy"
+        :class="{ 'liya-ai-chat-vuejs-message__copy--success': copySuccess }"
+        @click="handleCopy"
+        :title="copySuccess ? 'Kopyalandı!' : 'Kopyala'"
+      >
+        <!-- Check icon (success) -->
+        <svg v-if="copySuccess" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+          <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <!-- Copy icon -->
+        <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+        </svg>
+      </button>
       
       <!-- Suggestions from parsed response -->
       <div v-if="suggestions.length > 0" class="liya-ai-chat-vuejs-message__suggestions">
@@ -538,6 +583,51 @@ function formatTime(dateString: string): string {
   background: none;
   padding: 0;
   color: #e2e8f0;
+}
+
+.liya-ai-chat-vuejs-message__text :deep(a) {
+  color: #a5b4fc;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-all;
+}
+
+.liya-ai-chat-vuejs-message__text :deep(a:hover) {
+  color: #c7d2fe;
+}
+
+.liya-ai-chat-vuejs-message--user .liya-ai-chat-vuejs-message__text :deep(a) {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.liya-ai-chat-vuejs-message__copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-top: 4px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--liya-ai-chat-vuejs-text-muted, #64748b);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.liya-ai-chat-vuejs-message__copy:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--liya-ai-chat-vuejs-text-secondary, #94a3b8);
+}
+
+.liya-ai-chat-vuejs-message__copy:active {
+  transform: scale(0.9);
+}
+
+.liya-ai-chat-vuejs-message__copy--success {
+  color: #22c55e;
 }
 
 .liya-ai-chat-vuejs-message__meta {
