@@ -421,6 +421,6 @@ MIT © Liya Labs
 ## Support
 
 - 🌐 Website: [liyalabs.com](https://liyalabs.com)
-- 📖 Documentation: [docs.liyalabs.com](https://docs.liyalabs.com)
+- 📖 Documentation: [ai.liyalabs.com/developer](https://ai.liyalabs.com/developer)
 - 🐛 Issues: [GitHub Issues](https://github.com/liyalabs/liya-ai-chat/issues)
 - 📧 Email: support@liyalabs.com
