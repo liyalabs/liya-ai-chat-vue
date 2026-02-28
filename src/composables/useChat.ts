@@ -101,6 +101,7 @@ export function useChat() {
           role: 'assistant',
           created_at: new Date().toISOString(),
           response_time: response.response_time,
+          media: response.media,
         })
       }
 

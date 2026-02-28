@@ -31,9 +31,76 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   (e: 'suggestion-click', suggestion: string): void
   (e: 'suggestion-edit', suggestion: string): void
+  (e: 'media-click', media: { type: 'image' | 'video'; url: string; alt: string }): void
 }>()
 
 const isUser = props.message.role === 'user'
+
+// Media loading states
+const mediaLoadStates = ref<Record<string, string>>({})
+
+// Media item interface
+interface MediaItem {
+  type: 'image' | 'video'
+  url: string
+  alt: string
+}
+
+// Extract images from content or backend media array
+function liyaAiChatVuejsExtractImages(): MediaItem[] {
+  // Backend media dizisi varsa onu kullan (daha güvenilir)
+  if (props.message.media && Array.isArray(props.message.media)) {
+    return props.message.media
+      .filter((m: any) => m.type === 'image')
+      .map((m: any) => ({ type: 'image' as const, url: m.url, alt: m.alt || 'Görsel' }))
+  }
+  // Fallback: Markdown'dan parse
+  const content = props.message.content || ''
+  const regex = /!\[([^\]]*)\]\(([^)]+)\)/g
+  const images: MediaItem[] = []
+  let match
+  while ((match = regex.exec(content)) !== null) {
+    images.push({ type: 'image', url: match[2], alt: match[1] || 'Görsel' })
+  }
+  return images
+}
+
+// Extract videos from content or backend media array
+function liyaAiChatVuejsExtractVideos(): MediaItem[] {
+  // Backend media dizisi varsa onu kullan (daha güvenilir)
+  if (props.message.media && Array.isArray(props.message.media)) {
+    return props.message.media
+      .filter((m: any) => m.type === 'video')
+      .map((m: any) => ({ type: 'video' as const, url: m.url, alt: m.alt || 'Video' }))
+  }
+  // Fallback: Markdown'dan parse
+  const content = props.message.content || ''
+  const regex = /\[([^\]]*)\]\((https?:\/\/[^)]+\.(?:mp4|webm|mov|MP4|WEBM|MOV))\)/g
+  const videos: MediaItem[] = []
+  let match
+  while ((match = regex.exec(content)) !== null) {
+    videos.push({ type: 'video', url: match[2], alt: match[1] || 'Video' })
+  }
+  return videos
+}
+
+// Get text content without image/video markdown
+function liyaAiChatVuejsGetTextContent(content: string): string {
+  return content
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '')
+    .replace(/\[([^\]]*)\]\((https?:\/\/[^)]+\.(?:mp4|webm|mov|MP4|WEBM|MOV))\)/g, '')
+    .trim()
+}
+
+// Computed media items
+const mediaImages = computed(() => liyaAiChatVuejsExtractImages())
+const mediaVideos = computed(() => liyaAiChatVuejsExtractVideos())
+const hasMedia = computed(() => mediaImages.value.length > 0 || mediaVideos.value.length > 0)
+
+// Handle media click
+function handleMediaClick(media: MediaItem): void {
+  emit('media-click', media)
+}
 
 // Fields to exclude from preview
 const excludedPreviewFields = ['metadata', 'source', 'sources', 'raw_response', 'id', 'created_at', 'updated_at', 'session_id', 'message_id', 'response', 'suggestions']
@@ -220,12 +287,18 @@ function parseMarkdown(text: string): string {
 }
 
 // Get display content - either parsed response text or original content
+// Media markdown'ları temizlenir (ayrı render edilecek)
 const displayContent = computed(() => {
   let content = ''
   if (parsedResponse.value) {
     content = parsedResponse.value.response
   } else {
     content = props.message.content || ''
+  }
+  
+  // Medya varsa markdown'larını temizle (ayrı thumbnail olarak render edilecek)
+  if (hasMedia.value && content) {
+    content = liyaAiChatVuejsGetTextContent(content)
   }
   
   // Parse markdown for assistant messages
@@ -419,6 +492,68 @@ async function handleCopy(): Promise<void> {
         
         <!-- Regular text content -->
         <div v-else class="liya-ai-chat-vuejs-message__text" v-html="displayContent"></div>
+        
+        <!-- Image thumbnails -->
+        <div 
+          v-for="img in mediaImages" 
+          :key="img.url"
+          class="liya-ai-chat-vuejs-media-thumbnail"
+          @click="handleMediaClick(img)"
+        >
+          <div 
+            v-if="!mediaLoadStates[img.url] || mediaLoadStates[img.url] === 'loading'"
+            class="liya-ai-chat-vuejs-media-skeleton"
+          >
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21,15 16,10 5,21"/>
+            </svg>
+          </div>
+          <img 
+            :src="img.url" 
+            :alt="img.alt"
+            crossorigin="anonymous"
+            class="liya-ai-chat-vuejs-media-img"
+            :class="{ 'liya-ai-chat-vuejs-media-img--hidden': mediaLoadStates[img.url] !== 'loaded' }"
+            loading="lazy"
+            @load="mediaLoadStates[img.url] = 'loaded'"
+            @error="mediaLoadStates[img.url] = 'error'"
+          />
+          <div v-if="mediaLoadStates[img.url] === 'loaded'" class="liya-ai-chat-vuejs-media-hint">
+            🖼 Tıkla — büyüt
+          </div>
+          <div v-if="mediaLoadStates[img.url] === 'error'" class="liya-ai-chat-vuejs-media-error">
+            ⚠️ Görsel yüklenemedi
+          </div>
+        </div>
+        
+        <!-- Video thumbnails -->
+        <div 
+          v-for="vid in mediaVideos" 
+          :key="vid.url"
+          class="liya-ai-chat-vuejs-media-thumbnail"
+          @click="handleMediaClick(vid)"
+        >
+          <div class="liya-ai-chat-vuejs-video-container">
+            <video 
+              :src="vid.url + '#t=0.001'"
+              preload="metadata"
+              muted
+              playsinline
+              webkit-playsinline
+              class="liya-ai-chat-vuejs-video-thumb"
+              @loadeddata="mediaLoadStates[vid.url] = 'loaded'"
+              @error="mediaLoadStates[vid.url] = 'error'"
+            />
+            <div class="liya-ai-chat-vuejs-video-overlay">
+              <div class="liya-ai-chat-vuejs-video-play-btn">▶</div>
+            </div>
+          </div>
+          <div class="liya-ai-chat-vuejs-media-hint">
+            🎬 Tıkla — izle
+          </div>
+        </div>
       </div>
 
       <!-- Copy button for assistant messages -->
@@ -846,5 +981,112 @@ async function handleCopy(): Promise<void> {
 .liya-ai-chat-vuejs-edit-btn:hover {
   background: rgba(99, 102, 241, 0.1);
   color: rgba(165, 180, 252, 0.9);
+}
+
+/* Media Thumbnail Styles */
+.liya-ai-chat-vuejs-media-thumbnail {
+  display: inline-block;
+  margin: 8px 0;
+  cursor: pointer;
+  max-width: min(280px, 100%);
+}
+
+.liya-ai-chat-vuejs-media-skeleton {
+  width: min(280px, 100%);
+  aspect-ratio: 1;
+  border-radius: 12px;
+  background: linear-gradient(110deg, rgba(255,255,255,0.05) 8%, rgba(255,255,255,0.12) 18%, rgba(255,255,255,0.05) 33%);
+  background-size: 200% 100%;
+  animation: liya-ai-chat-vuejs-shimmer 1.5s infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes liya-ai-chat-vuejs-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.liya-ai-chat-vuejs-media-img {
+  max-width: min(280px, 100%);
+  max-height: 280px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.liya-ai-chat-vuejs-media-img--hidden {
+  display: none;
+}
+
+.liya-ai-chat-vuejs-media-img:hover {
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
+  transform: scale(1.02);
+}
+
+.liya-ai-chat-vuejs-video-container {
+  position: relative;
+  width: min(280px, 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: all 0.3s ease;
+}
+
+.liya-ai-chat-vuejs-video-container:hover {
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
+}
+
+.liya-ai-chat-vuejs-video-thumb {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  background: #111;
+  display: block;
+}
+
+.liya-ai-chat-vuejs-video-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.25);
+  transition: background 0.2s;
+}
+
+.liya-ai-chat-vuejs-video-overlay:hover {
+  background: rgba(0,0,0,0.35);
+}
+
+.liya-ai-chat-vuejs-video-play-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(99,102,241,0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+}
+
+.liya-ai-chat-vuejs-media-hint {
+  font-size: 11px;
+  margin-top: 4px;
+  opacity: 0.6;
+  color: var(--liya-ai-chat-vuejs-text-muted, #64748b);
+}
+
+.liya-ai-chat-vuejs-media-error {
+  font-size: 12px;
+  margin-top: 4px;
+  color: rgba(239, 68, 68, 0.8);
 }
 </style>
